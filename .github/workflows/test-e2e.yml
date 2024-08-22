@@ -1,4 +1,4 @@
-name: Nightly Main E2E tests
+name: Testing E2E Demo
 on:
   workflow_dispatch:
     inputs:
@@ -18,7 +18,7 @@ jobs:
     # if: ${{ github.repository_owner == 'AutoMQ' }}
     with:
       suite-id: "main1"
-      test-path: "tests/kafkatest/core/get_offset_shell_test.py::GetOffsetShellTest.test_get_offset_shell_topic_name"
+      test-path: "tests/kafkatest/tests/core/get_offset_shell_test.py::GetOffsetShellTest.test_get_offset_shell_topic_name"
       runner: ${{ inputs.runs_on || 'main' }}
   main_e2e_2:
     name: "Run Main E2E Tests 2"
@@ -26,7 +26,7 @@ jobs:
     # if: ${{ github.repository_owner == 'AutoMQ' }}
     with:
       suite-id: "main2"
-      test-yaml: "tests/kafkatest/core/snapshot_test.py::TestSnapshots.test_controller@{\"metadata_quorum\"=\"ISOLATED_KRAFT\", \"use_new_coordinator\"=\"True\", \"group_protocol\"=\"classic\"}"
+      test-path: "tests/kafkatest/tests/core/snapshot_test.py::TestSnapshots.test_controller@{\"metadata_quorum\"=\"ISOLATED_KRAFT\", \"use_new_coordinator\"=\"True\", \"group_protocol\"=\"classic\"}"
       runner: ${{ inputs.runs_on || 'main' }}
   e2e_summary:
     runs-on: ${{ inputs.runs_on || 'main' }}
