@@ -1,0 +1,44 @@
+name: Nightly Main E2E tests
+on:
+  workflow_dispatch:
+    inputs:
+      runs_on:
+        description: 'Runs on'
+        required: false
+        default: main-release
+        type: choice
+        options:
+          - main
+          - main-release
+
+jobs:
+  main_e2e_1:
+    name: "Run Main E2E Tests 1"
+    uses: ./.github/workflows/e2e-run.yml
+    # if: ${{ github.repository_owner == 'AutoMQ' }}
+    with:
+      suite-id: "main1"
+      test-path: "tests/kafkatest/core/get_offset_shell_test.py::GetOffsetShellTest.test_get_offset_shell_topic_name"
+      runner: ${{ inputs.runs_on || 'main' }}
+  main_e2e_2:
+    name: "Run Main E2E Tests 2"
+    uses: ./.github/workflows/e2e-run.yml
+    # if: ${{ github.repository_owner == 'AutoMQ' }}
+    with:
+      suite-id: "main2"
+      test-yaml: "tests/kafkatest/core/snapshot_test.py::TestSnapshots.test_controller@{\"metadata_quorum\"=\"ISOLATED_KRAFT\", \"use_new_coordinator\"=\"True\", \"group_protocol\"=\"classic\"}"
+      runner: ${{ inputs.runs_on || 'main' }}
+  e2e_summary:
+    runs-on: ${{ inputs.runs_on || 'main' }}
+    name: "E2E Tests Summary"
+    if: ${{ always() }}
+    needs: [ main_e2e_1, main_e2e_2 ]
+    steps:
+      - name: Report results
+        run: python3 tests/report_e2e_results.py
+        env:
+          CURRENT_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          WEB_HOOK_URL: ${{ secrets.E2E_REPORT_WEB_HOOK_URL }}
+          DATA_MAP: "{\"main_e2e_1\": ${{ toJSON(needs.main_e2e_1.outputs) }}, \"main_e2e_2\": ${{ toJSON(needs.main_e2e_2.outputs) }}}"
+          REPORT_TITLE_PREFIX: "Main"
